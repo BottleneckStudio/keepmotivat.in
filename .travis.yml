@@ -1,9 +1,15 @@
+# use the latest ubuntu environment (18.04) available on travis
+dist: xenial
+
 language: go
 sudo: false
 
 go:
   - 1.11.x
   - 1.12.5
+
+git:
+  depth: 1
 
 env:
   global:
