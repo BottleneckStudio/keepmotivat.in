@@ -8,7 +8,7 @@ fi
 
 GOLINT=$GOPATH/bin/golangci-lint
 GOIMPORTS=$GOPATH/bin/goimports
-APP_DIR='find . -type f -name "*.go"'
+# APP_DIR='find . -type f -name "*.go"'
 
 # Check for golint
 if [[ ! -x "$GOLINT" ]]; then
@@ -31,7 +31,7 @@ do
 
   # Run golint on the staged file and check the exit status
 	echo "LINTING ->" $FILE
-  $GOLINT run $APP_DIR
+  $GOLINT run $FILE
   if [[ $? == 1 ]]; then
     printf "\t\033[31mgolint $FILE\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
     PASS=false
@@ -41,7 +41,7 @@ do
 
   # Run govet on the staged file and check the exit status
 	echo "RUNNING GO VET -> " $FILE
-  go vet $APP_DIR
+  go vet $FILE
   if [[ $? != 0 ]]; then
     printf "\t\033[31mgo vet $FILE\033[0m \033[0;30m\033[41mFAILURE!\033[0m\n"
     PASS=false
