@@ -3,3 +3,12 @@
 
 
 > An app that keeps you motivated. 🏋 💪
+
+
+# Installation:
+```sh
+$ cd $GOPATH/src/github.com && mkdir BottleNeckStudio
+$ git clone git@github.com:BottleneckStudio/keepmotivat.in.git
+$ dep ensure
+$ ./scripts/pre-commit-setup.sh
+```
