@@ -8,7 +8,7 @@ fi
 
 GOLINT=$GOPATH/bin/golangci-lint
 GOIMPORTS=$GOPATH/bin/goimports
-APP_DIR=app/*.go
+APP_DIR='find . -type f -name "*.go"'
 
 # Check for golint
 if [[ ! -x "$GOLINT" ]]; then

@@ -1,8 +1,5 @@
 package main
 
 func main() {
-}
-
-func helloWorld() string {
-	return "Hello World"
+	print("Hello World")
 }
