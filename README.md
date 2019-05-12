@@ -12,14 +12,3 @@ $ git clone git@github.com:BottleneckStudio/keepmotivat.in.git
 $ dep ensure
 $ ./scripts/pre-commit-setup.sh
 ```
-
-# npm
-
-After cloning run the following commands
-
-```
-$ npm install
-$ npm run build
-```
-
-This will ensure that uikit and all future `stylesheet` assets will be bundled by **Webpack**
