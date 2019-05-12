@@ -50,3 +50,8 @@ Temporary Items
 # fresh runner file
 /tmp
 
+# Dependency directories
+node_modules/
+dist/
+app/data/assets/app.bundle.*.js
+app/data/base.html

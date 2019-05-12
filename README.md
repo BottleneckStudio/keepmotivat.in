@@ -12,3 +12,25 @@ $ git clone git@github.com:BottleneckStudio/keepmotivat.in.git
 $ dep ensure
 $ ./scripts/pre-commit-setup.sh
 ```
+
+# npm
+
+After cloning run the following commands.
+
+```
+$ npm install
+$ npm run build
+```
+
+This will ensure that uikit and all future `stylesheet` assets will be bundled by **Webpack**.
+
+## Adding new stylesheets
+
+If you want custom stylesheet files you must add them under `./app/data/assets/stylesheets/main/`
+and reference them in `.app/data/assets/stylesheets/main.scss` by adding the following.
+
+```
+*main.scss*
+@import './main/*custom-scss-file.scss*'
+```
+You have to run `$npm run build` below everytime you will add a new `scss` file or change the current stylesheet files to include them with the current webpack bundle.
