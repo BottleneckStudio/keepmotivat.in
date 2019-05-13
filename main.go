@@ -8,13 +8,7 @@ const (
 )
 
 func main() {
-	initializeDB()
 
-	// Setup routes here later-on
-	print("Hello World")
-}
-
-func initializeDB() {
 	db, err := models.NewDatabase(dsn)
 	if err != nil {
 		// panic for now.
@@ -26,4 +20,7 @@ func initializeDB() {
 	db.Create(dbName)
 	db.Use(dbName)
 	db.Migrate()
+
+	// Setup routes here later-on
+	print("Hello World")
 }

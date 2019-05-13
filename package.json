@@ -4,7 +4,6 @@
   "description": "An app that keeps you motivated",
   "main": "index.js",
   "devDependencies": {
-    "admin-lte": "^2.4.10",
     "clean-webpack-plugin": "^2.0.2",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^1.0.1",
