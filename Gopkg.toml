@@ -37,6 +37,3 @@
   name = "github.com/go-chi/chi"
   version = "4.0.2"
 
-[[constraint]]
-  name = "github.com/thedevsaddam/renderer"
-  version = "1.2.0"
