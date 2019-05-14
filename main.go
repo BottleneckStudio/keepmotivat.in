@@ -1,6 +1,18 @@
 package main
 
-import "github.com/BottleneckStudio/keepmotivat.in/models"
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
+	"github.com/BottleneckStudio/keepmotivat.in/models"
+	"github.com/BottleneckStudio/keepmotivat.in/server"
+	"github.com/go-chi/chi"
+)
 
 const (
 	dbName = "keepmotivatin"
@@ -8,13 +20,11 @@ const (
 )
 
 func main() {
-	initializeDB()
 
-	// Setup routes here later-on
-	print("Hello World")
-}
+	router := chi.NewRouter()
 
-func initializeDB() {
+	// Middleware here if ever.
+
 	db, err := models.NewDatabase(dsn)
 	if err != nil {
 		// panic for now.
@@ -26,4 +36,27 @@ func initializeDB() {
 	db.Create(dbName)
 	db.Use(dbName)
 	db.Migrate()
+
+	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "World")
+	})
+
+	s := server.New(":1333", router)
+	go func() {
+		s.Start()
+	}()
+
+	gracefulShutdown(s.HTTPServer)
+}
+
+func gracefulShutdown(srv *http.Server) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	<-c
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Something went wrong with the graceful shutdown: %v", err)
+	}
 }
