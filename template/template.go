@@ -1,25 +1,27 @@
 package template
 
 import (
-	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-const (
-	ext = ".html"
-)
+// const (
+// 	ext = ".html"
+// )
 
-// ParseTemplateDir parses a given directory to a template.
-func ParseTemplateDir(dir string) (*template.Template, error) {
+// Template wraps the html/template package
+type Template struct {
+	*template.Template
+}
+
+// New returns a pointer custom type template.
+func New(dir string) *Template {
 	var paths []string
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			return nil
 		}
 		if !info.IsDir() {
 			paths = append(paths, path)
@@ -27,84 +29,19 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
-	}
-	return template.ParseFiles(paths...)
-}
-
-// Template ...
-type Template struct {
-	templates map[string]*template.Template
-}
-
-// Add ...
-func (t Template) Add(name string, tmpl *template.Template) {
-	if tmpl == nil {
-		panic("template can not be nil")
-	}
-	if len(name) == 0 {
-		panic("template name cannot be empty")
-	}
-	t.templates[name] = tmpl
-}
-
-// Render ...
-func (t *Template) Render(w io.Writer, name string, data interface{}) error {
-	if _, ok := t.templates[name]; !ok {
-		// not such view
-		return fmt.Errorf("no such view. (%s)", name)
-	}
-	return t.templates[name].Execute(w, data)
-}
-
-// New creates a new template
-func New(templatesDir string) *Template {
-	ins := Template{
-		templates: map[string]*template.Template{},
+		return nil
 	}
 
-	layout := templatesDir + "layouts/base" + ext
-	// adminLayout := templatesDir + "layouts/admin" + ext
-	// ampLayout := templatesDir + "layouts/amp" + ext
+	tmpl, err := template.ParseFiles(paths...)
 
-	_, err := os.Stat(layout)
 	if err != nil {
-		log.Panicf("cannot find %s", layout)
-		os.Exit(1)
+		return nil
 	}
 
-	// _, err = os.Stat(adminLayout)
-	// if err != nil {
-	// 	log.Printf("cannot find %s", adminLayout)
-	// 	os.Exit(1)
-	// }
-	// _, err = os.Stat(ampLayout)
-	// if err != nil {
-	// 	log.Printf("cannot find %s", ampLayout)
-	// 	os.Exit(1)
-	// }
+	return &Template{tmpl}
+}
 
-	partials, err := filepath.Glob(templatesDir + "partials/" + "*" + ext)
-	if err != nil {
-		log.Print("cannot find " + templatesDir + "partials/" + "*" + ext)
-		os.Exit(1)
-	}
-
-	funcMap := template.FuncMap{
-		"safehtml": func(text string) template.HTML { return template.HTML(text) },
-	}
-
-	views, _ := filepath.Glob(templatesDir + "**/*" + ext)
-	for _, view := range views {
-		dir, file := filepath.Split(view)
-		dir = strings.Replace(dir, templatesDir, "", 1)
-		file = strings.TrimSuffix(file, ext)
-		renderName := dir + file
-
-		tmplfiles := append([]string{layout, view}, partials...)
-		tmpl := template.Must(template.New(filepath.Base(layout)).Funcs(funcMap).ParseFiles(tmplfiles...))
-		ins.Add(renderName, tmpl)
-		log.Printf("renderName: %s, layout: %s", renderName, layout)
-	}
-	return &ins
+// Render a data by a given w.
+func (tmpl *Template) Render(w io.Writer, htmlFile string, data interface{}) error {
+	return tmpl.ExecuteTemplate(w, htmlFile, data)
 }
