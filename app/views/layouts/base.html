@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html id="html-head">
   <head>
-    <meta charset="UTF-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta name="google-site-verification" content="VHXKqODh7sXHhgfW82AxHeEyD1wTlr_u71dglxSgu1s">
-    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="format-detection" content="telephone=no">
-
+		<title>{{.SITENAME}}</title>
+   {{ template "meta" . }}
+	<link href="/assets/dist/vendor.2a4c8f99a045a989cb3a.css" rel="stylesheet"><script type="text/javascript" src="/assets/dist/vendor.3fea07de07bcb617bef9.js"></script><script type="text/javascript" src="/assets/dist/main.8d8dadd60b2eb573e4df.js"></script></head>
   <body>
-    <!-- {{template "partials_header" .}} -->
-    <!-- {{template "partials_flash_base" .}} -->
     <div class="wrapper" id="wrapper">
       <div id="content">
-	      <!-- {{template "content" .}} -->
+				{{ block "content" . }} {{ end }}
       </div>
     </div>
-    <!-- {{template "partials_footer" .}} -->
+		{{ template "footer" . }}
   </body>
 </html>
