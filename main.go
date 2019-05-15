@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/BottleneckStudio/keepmotivat.in/app/controllers"
 	"github.com/BottleneckStudio/keepmotivat.in/models"
 	"github.com/BottleneckStudio/keepmotivat.in/server"
 	"github.com/go-chi/chi"
@@ -40,6 +41,8 @@ func main() {
 	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "World")
 	})
+
+	router.Get("/", controllers.FeedController())
 
 	s := server.New(":1333", router)
 	go func() {
