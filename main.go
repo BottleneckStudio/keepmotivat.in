@@ -43,6 +43,7 @@ func main() {
 	})
 
 	router.Get("/", controllers.FeedController())
+	router.Get("/post/{postID}", controllers.PostController())
 
 	s := server.New(":1333", router)
 	go func() {
