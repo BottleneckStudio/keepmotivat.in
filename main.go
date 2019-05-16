@@ -43,6 +43,9 @@ func main() {
 	})
 
 	router.Get("/", controllers.FeedController())
+	router.Get("/tos", controllers.TermsOfServiceController())
+	router.Get("/about", controllers.AboutController())
+	router.Get("/privacy", controllers.PrivacyController())
 	router.Get("/post/{postID}", controllers.PostController())
 
 	s := server.New(":1333", router)
