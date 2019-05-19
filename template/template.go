@@ -4,20 +4,14 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
+	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-/*
-view files should be below
-- app/views/layouts/base.html
-- app/views/layouts/amp.html
-- app/views/layouts/admin.html
-- app/views/partials/XXXX.html
-- app/views/XXX/YYY.html
-*/
+const (
+	ext = ".html"
+)
 
 // Template ...
 type Template struct {
@@ -46,41 +40,47 @@ func (t *Template) Render(w io.Writer, name string, data interface{}) error {
 
 // New creates a new template
 func New(templatesDir string) *Template {
-	ext := ".html"
-
-	ins := Template{
+	result := &Template{
 		templates: make(map[string]*template.Template),
 	}
 
-	layout := templatesDir + "layouts/base" + ext
+	layout := template.Must(template.ParseFiles(templatesDir + "layouts/base" + ext))
+	template.Must(layout.ParseGlob(templatesDir + "includes/" + "*" + ext))
 
-	_, err := os.Stat(layout)
+	dir, err := os.Open(templatesDir + "/content")
 	if err != nil {
-		log.Panicf("cannot find %s", layout)
-		os.Exit(1)
+		panic("Failed to open template blocks directory: " + err.Error())
 	}
 
-	partials, err := filepath.Glob(templatesDir + "partials/" + "*" + ext)
+	fis, err := dir.Readdir(-1)
 	if err != nil {
-		log.Print("cannot find " + templatesDir + "partials/" + "*" + ext)
-		os.Exit(1)
+		panic("Failed to read contents of content directory: " + err.Error())
 	}
 
-	funcMap := template.FuncMap{
-		"safehtml": func(text string) template.HTML { return template.HTML(text) },
+	// boot template functions.
+	templateFunc := template.FuncMap{
+		"toLower": func(uc string) string {
+			return strings.ToLower(uc)
+		},
 	}
 
-	views, _ := filepath.Glob(templatesDir + "**/*" + ext)
-	for _, view := range views {
-		dir, file := filepath.Split(view)
-		dir = strings.Replace(dir, templatesDir, "", 1)
-		file = strings.TrimSuffix(file, ext)
-		renderName := dir + file
-
-		tmplfiles := append([]string{layout, view}, partials...)
-		tmpl := template.Must(template.New(filepath.Base(layout)).Funcs(funcMap).ParseFiles(tmplfiles...))
-		ins.Add(renderName, tmpl)
-		log.Printf("renderName: %s, layout: %s", renderName, layout)
+	for _, fi := range fis {
+		f, err := os.Open(templatesDir + "/content/" + fi.Name())
+		if err != nil {
+			panic("Failed to open template '" + fi.Name() + "'")
+		}
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
+			panic("Failed to read content from file '" + fi.Name() + "'")
+		}
+		f.Close()
+		tmpl := template.Must(layout.Clone()).Funcs(templateFunc)
+		_, err = tmpl.Parse(string(content))
+		if err != nil {
+			panic("Failed to parse contents of '" + fi.Name() + "' as template")
+		}
+		result.templates[fi.Name()] = tmpl
 	}
-	return &ins
+
+	return result
 }

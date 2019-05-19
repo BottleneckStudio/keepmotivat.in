@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/BottleneckStudio/keepmotivat.in/app/controllers"
 	"github.com/BottleneckStudio/keepmotivat.in/models"
 	"github.com/BottleneckStudio/keepmotivat.in/server"
+	tmpl "github.com/BottleneckStudio/keepmotivat.in/template"
 	"github.com/go-chi/chi"
 )
 
@@ -39,7 +39,12 @@ func main() {
 	db.Migrate()
 
 	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "World")
+		tpl := tmpl.New("./app/views/")
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := tpl.Render(w, "hello.html", "HELLO WORLD ALL CAPS!"); err != nil {
+			return
+		}
 	})
 
 	router.Get("/", controllers.FeedController())

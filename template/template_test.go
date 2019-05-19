@@ -26,7 +26,7 @@ func TestParseTemplateDir(t *testing.T) {
 		t.Fatalf("Creating instance of template should not be nil, but got an error: [ %v ] instead.", tmpl)
 	}
 
-	if err := tmpl.Render(os.Stdout, "hello/hello", &data); err != nil {
+	if err := tmpl.Render(os.Stdout, "about.html", &data); err != nil {
 		t.Fatalf("Expects to render an html output, but got an error: [ %v ] instead.", err)
 	}
 }
@@ -36,7 +36,7 @@ func BenchmarkRender(b *testing.B) {
 	tmpl := temp.New("../app/views/")
 
 	for i := 0; i < b.N; i++ {
-		if err := tmpl.Render(os.Stdout, "hello/hello", nil); err != nil {
+		if err := tmpl.Render(os.Stdout, "about.html", nil); err != nil {
 			panic(err)
 		}
 	}
