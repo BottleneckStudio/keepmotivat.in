@@ -1,47 +1,86 @@
 package template
 
 import (
+	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"os"
-	"path/filepath"
+	"strings"
 )
 
-// const (
-// 	ext = ".html"
-// )
+const (
+	ext = ".html"
+)
 
-// Template wraps the html/template package
+// Template ...
 type Template struct {
-	*template.Template
+	templates map[string]*template.Template
 }
 
-// New returns a pointer custom type template.
-func New(dir string) *Template {
-	var paths []string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+// Add ...
+func (t Template) Add(name string, tmpl *template.Template) {
+	if tmpl == nil {
+		panic("template can not be nil")
+	}
+	if len(name) == 0 {
+		panic("template name cannot be empty")
+	}
+	t.templates[name] = tmpl
+}
+
+// Render ...
+func (t *Template) Render(w io.Writer, name string, data interface{}) error {
+	if _, ok := t.templates[name]; !ok {
+		// not such view
+		return fmt.Errorf("no such view. (%s)", name)
+	}
+	return t.templates[name].Execute(w, data)
+}
+
+// New creates a new template
+func New(templatesDir string) *Template {
+	result := &Template{
+		templates: make(map[string]*template.Template),
+	}
+
+	layout := template.Must(template.ParseFiles(templatesDir + "layouts/base" + ext))
+	template.Must(layout.ParseGlob(templatesDir + "includes/" + "*" + ext))
+
+	dir, err := os.Open(templatesDir + "/content")
+	if err != nil {
+		panic("Failed to open template blocks directory: " + err.Error())
+	}
+
+	fis, err := dir.Readdir(-1)
+	if err != nil {
+		panic("Failed to read contents of content directory: " + err.Error())
+	}
+
+	// boot template functions.
+	templateFunc := template.FuncMap{
+		"toLower": func(uc string) string {
+			return strings.ToLower(uc)
+		},
+	}
+
+	for _, fi := range fis {
+		f, err := os.Open(templatesDir + "/content/" + fi.Name())
 		if err != nil {
-			return nil
+			panic("Failed to open template '" + fi.Name() + "'")
 		}
-		if !info.IsDir() {
-			paths = append(paths, path)
+		content, err := ioutil.ReadAll(f)
+		if err != nil {
+			panic("Failed to read content from file '" + fi.Name() + "'")
 		}
-		return nil
-	})
-	if err != nil {
-		return nil
+		f.Close()
+		tmpl := template.Must(layout.Clone()).Funcs(templateFunc)
+		_, err = tmpl.Parse(string(content))
+		if err != nil {
+			panic("Failed to parse contents of '" + fi.Name() + "' as template")
+		}
+		result.templates[fi.Name()] = tmpl
 	}
 
-	tmpl, err := template.ParseFiles(paths...)
-
-	if err != nil {
-		return nil
-	}
-
-	return &Template{tmpl}
-}
-
-// Render a data by a given w.
-func (tmpl *Template) Render(w io.Writer, htmlFile string, data interface{}) error {
-	return tmpl.ExecuteTemplate(w, htmlFile, data)
+	return result
 }
