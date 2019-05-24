@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	dbName = "keepmotivatin"
-	dsn    = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
+	dbName  = "keepmotivatin"
+	dsn     = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
+	certKey = "./certificates/localhost+1.pem"
+	privKey = "./certificates/localhost+1-key.pem"
 )
 
 func main() {
@@ -67,7 +69,8 @@ func main() {
 
 	s := server.New(":1333", router)
 	go func() {
-		s.Start()
+		// s.Start()
+		s.StartTLS(certKey, privKey)
 	}()
 
 	gracefulShutdown(s.HTTPServer)
