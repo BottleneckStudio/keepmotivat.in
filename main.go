@@ -57,6 +57,7 @@ func main() {
 		if err := tpl.Render(w, "hello.html", "HELLO WORLD ALL CAPS!"); err != nil {
 			return
 		}
+
 	})
 
 	router.Get("/", controllers.FeedController())
