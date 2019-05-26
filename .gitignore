@@ -15,6 +15,7 @@
 ### Go Patch ###
 /vendor/
 /Godeps/
+certificates/*
 
 ### macOS ###
 # General

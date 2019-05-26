@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	dbName = "keepmotivatin"
-	dsn    = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
+	dbName  = "keepmotivatin"
+	dsn     = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
+	certKey = "./certificates/localhost+1.pem"
+	privKey = "./certificates/localhost+1-key.pem"
 )
 
 func main() {
@@ -42,6 +44,14 @@ func main() {
 
 	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
 		tpl := tmpl.New("./app/views/")
+
+		if pusher, ok := w.(http.Pusher); ok {
+			if err := pusher.Push("/assets/stylesheets/app.css", &http.PushOptions{
+				Header: http.Header{"Content-Type": []string{"text/css"}},
+			}); err != nil {
+				log.Fatalf("Server push is not supported: %v", err)
+			}
+		}
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := tpl.Render(w, "hello.html", "HELLO WORLD ALL CAPS!"); err != nil {
@@ -67,7 +77,8 @@ func main() {
 
 	s := server.New(":1333", router)
 	go func() {
-		s.Start()
+		// s.Start()
+		s.StartTLS(certKey, privKey)
 	}()
 
 	gracefulShutdown(s.HTTPServer)
