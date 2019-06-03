@@ -24,10 +24,10 @@ var store *sessions.CookieStore
 const (
 	dbName      = "keepmotivatin"
 	dsn         = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
-	certKey     = "./certificates/localhost+1.pem"
-	privKey     = "./certificates/localhost+1-key.pem"
 	staticFiles = "app/data/assets"
 	proxyPath   = "/assets"
+	// certKey     = "./certificates/localhost+1.pem"
+	// privKey     = "./certificates/localhost+1-key.pem"
 )
 
 func init() {
@@ -89,8 +89,7 @@ func main() {
 
 	s := server.New(":1333", router)
 	go func() {
-		// s.Start()
-		s.StartTLS(certKey, privKey)
+		s.Start()
 	}()
 
 	gracefulShutdown(s.HTTPServer)
