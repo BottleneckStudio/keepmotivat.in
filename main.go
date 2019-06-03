@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -53,33 +52,6 @@ func main() {
 	db.Create(dbName)
 	db.Use(dbName)
 	db.Migrate()
-
-	router.Get("/set", func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "flash-session")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		session.AddFlash("This is a flashed message!", "message")
-		if err := session.Save(r, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
-
-	router.Get("/get", func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "flash-session")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		fm := session.Flashes("message")
-		if fm == nil {
-			fmt.Fprint(w, "No flash messages")
-			return
-		}
-		if err := session.Save(r, w); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		fmt.Fprintf(w, "%v", fm[0])
-	})
 
 	router.Get("/", controllers.FeedController())
 	router.Get("/tos", controllers.TermsOfServiceController())
