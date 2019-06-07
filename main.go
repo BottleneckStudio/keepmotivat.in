@@ -13,20 +13,31 @@ import (
 	"github.com/BottleneckStudio/keepmotivat.in/app/controllers"
 	"github.com/BottleneckStudio/keepmotivat.in/models"
 	"github.com/BottleneckStudio/keepmotivat.in/server"
-	tmpl "github.com/BottleneckStudio/keepmotivat.in/template"
+	"github.com/gorilla/sessions"
+
 	"github.com/go-chi/chi"
 )
 
+var store *sessions.CookieStore
+
 const (
-	dbName  = "keepmotivatin"
-	dsn     = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
-	certKey = "./certificates/localhost+1.pem"
-	privKey = "./certificates/localhost+1-key.pem"
+	dbName      = "keepmotivatin"
+	dsn         = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
+	staticFiles = "app/data/assets"
+	proxyPath   = "/assets"
+	// certKey     = "./certificates/localhost+1.pem"
+	// privKey     = "./certificates/localhost+1-key.pem"
 )
+
+func init() {
+	store = sessions.NewCookieStore([]byte("a-secret-string"))
+	log.Println(store)
+}
 
 func main() {
 
 	router := chi.NewRouter()
+	serveStaticFiles(router, proxyPath, staticFiles)
 
 	// Middleware here if ever.
 
@@ -42,43 +53,15 @@ func main() {
 	db.Use(dbName)
 	db.Migrate()
 
-	router.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		tpl := tmpl.New("./app/views/")
-
-		if pusher, ok := w.(http.Pusher); ok {
-			if err := pusher.Push("/assets/stylesheets/app.css", &http.PushOptions{
-				Header: http.Header{"Content-Type": []string{"text/css"}},
-			}); err != nil {
-				log.Fatalf("Server push is not supported: %v", err)
-			}
-		}
-
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if err := tpl.Render(w, "hello.html", "HELLO WORLD ALL CAPS!"); err != nil {
-			return
-		}
-	})
-
 	router.Get("/", controllers.FeedController())
 	router.Get("/tos", controllers.TermsOfServiceController())
 	router.Get("/about", controllers.AboutController())
 	router.Get("/privacy", controllers.PrivacyController())
 	router.Get("/post/{postID}", controllers.PostController())
 
-	// get static files
-	workDir, err := os.Getwd()
-	if err != nil {
-		log.Printf("Current Dir not found: %v", err)
-		return
-	}
-
-	filesDir := filepath.Join(workDir, "app/data/assets")
-	FileServer(router, "/assets", http.Dir(filesDir))
-
 	s := server.New(":1333", router)
 	go func() {
-		// s.Start()
-		s.StartTLS(certKey, privKey)
+		s.Start()
 	}()
 
 	gracefulShutdown(s.HTTPServer)
@@ -94,6 +77,18 @@ func gracefulShutdown(srv *http.Server) {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Something went wrong with the graceful shutdown: %v", err)
 	}
+}
+
+func serveStaticFiles(r *chi.Mux, path, staticFilesPath string) {
+	// get static files
+	workDir, err := os.Getwd()
+	if err != nil {
+		log.Printf("Current Dir not found: %v", err)
+		return
+	}
+
+	filesDir := filepath.Join(workDir, staticFilesPath)
+	FileServer(r, path, http.Dir(filesDir))
 }
 
 // FileServer conveniently sets up a http.FileServer handler to serve

@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -36,6 +38,21 @@ func (t *Template) Render(w io.Writer, name string, data interface{}) error {
 		return fmt.Errorf("no such view. (%s)", name)
 	}
 	return t.templates[name].Execute(w, data)
+}
+
+// RenderHTML renders as HTML.
+func (t *Template) RenderHTML(w http.ResponseWriter, name string, dataTmp interface{}) error {
+	if pusher, ok := w.(http.Pusher); ok {
+		if err := pusher.Push("/assets/stylesheets/app.css", &http.PushOptions{
+			Header: http.Header{"Content-Type": []string{"text/css"}},
+		}); err != nil {
+			log.Fatalf("Server push is not supported: %v", err)
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	return t.Render(w, name, dataTmp)
 }
 
 // New creates a new template
