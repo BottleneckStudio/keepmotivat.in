@@ -15,6 +15,6 @@ func TermsOfServiceController() http.HandlerFunc {
 		flash := session.GetFlash(w, r)
 
 		// horray!
-		fmt.Fprintln(w, flash.Value)
+		fmt.Fprintln(w, flash.Message)
 	}
 }
