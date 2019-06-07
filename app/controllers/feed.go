@@ -15,7 +15,10 @@ func FeedController() http.HandlerFunc {
 
 		tpl := tmpl.New("./app/views/")
 
-		if err := tpl.RenderHTML(w, "feed.html", "HELLO WORLD ALL CAPS!"); err != nil {
+		data := map[string]interface{}{}
+		data["message"] = "Another World"
+
+		if err := tpl.RenderHTML(w, "feed.html", data); err != nil {
 			return
 		}
 	}
