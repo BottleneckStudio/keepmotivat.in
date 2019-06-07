@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/sessions"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 var store *sessions.CookieStore
@@ -37,9 +38,11 @@ func init() {
 func main() {
 
 	router := chi.NewRouter()
-	serveStaticFiles(router, proxyPath, staticFiles)
 
 	// Middleware here if ever.
+	router.Use(middleware.DefaultCompress)
+
+	serveStaticFiles(router, proxyPath, staticFiles)
 
 	db, err := models.NewDatabase(dsn)
 	if err != nil {
