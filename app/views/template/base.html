@@ -1,17 +1,16 @@
-{{ define "layout" }}
 <!DOCTYPE html>
 <html id="html-head">
   <head>
-		<title>{{ .Fullname }}</title>
-   {{ template "meta" . }}
+    <title> keepmotivat.in</title>
+		<link href="/assets/stylesheets/app.css" rel="stylesheet" />
 	</head>
   <body>
+		{{ template "header" . }}
     <div class="wrapper" id="wrapper">
       <div id="content">
 				{{ block "content" . }} {{ end }}
       </div>
     </div>
-		{{template "footer" .}}
+		{{ template "footer" . }}
   </body>
 </html>
-{{ end }}
