@@ -39,8 +39,8 @@ func main() {
 
 	router := chi.NewRouter()
 
-	// Middleware here if ever.
 	router.Use(middleware.DefaultCompress)
+	router.Use(middleware.Logger)
 
 	serveStaticFiles(router, proxyPath, staticFiles)
 
