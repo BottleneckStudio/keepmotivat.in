@@ -36,14 +36,25 @@ func (t *Template) Render(w io.Writer, name string, data interface{}) error {
 		// not such view
 		return fmt.Errorf("no such view. (%s)", name)
 	}
+
 	return t.templates[name].Execute(w, data)
 }
 
 // RenderHTML renders as HTML.
 func (t *Template) RenderHTML(w http.ResponseWriter, name string, dataTmp interface{}) error {
+
+	data := map[string]interface{}{}
+	list, ok := dataTmp.(map[string]interface{})
+
+	if ok {
+		for n, v := range list {
+			data[n] = v
+		}
+	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	return t.Render(w, name, dataTmp)
+	return t.Render(w, name, data)
 }
 
 // New creates a new template
