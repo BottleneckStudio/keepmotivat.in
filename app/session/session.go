@@ -1,42 +1,53 @@
 package session
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gorilla/sessions"
 )
 
-var (
-	// Store is the cookie store
-	Store *sessions.CookieStore
-	// Name is the session name
-	Name string
-)
-
-// Session stores session level information
-type Session struct {
-	Options   sessions.Options `json:"Options"`   // Pulled from: http://www.gorillatoolkit.org/pkg/sessions#Options
-	Name      string           `json:"Name"`      // Name for: http://www.gorillatoolkit.org/pkg/sessions#CookieStore.Get
-	SecretKey string           `json:"SecretKey"` // Key for: http://www.gorillatoolkit.org/pkg/sessions#CookieStore.New
+// Flash message
+type Flash struct {
+	Type    string
+	Message string
 }
 
-// Configure the session cookie store
-func Configure(s Session) {
-	Store = sessions.NewCookieStore([]byte(s.SecretKey))
-	Store.Options = &s.Options
-	Name = s.Name
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+// Get wraps the session store Getter
+func Get(r *http.Request, name string) (*sessions.Session, error) {
+	return store.Get(r, name)
 }
 
-// Instance returns a new session, never returns an error
-func Instance(r *http.Request) *sessions.Session {
-	session, _ := Store.Get(r, Name)
-	return session
-}
-
-// Empty deletes all the current session values
-func Empty(sess *sessions.Session) {
-	// Clear out all stored values in the cookie
-	for k := range sess.Values {
-		delete(sess.Values, k)
+// SetFlash sets the flash message with the given
+// type and message
+func SetFlash(w http.ResponseWriter, r *http.Request, t, m string) {
+	session, _ := store.Get(r, "notification")
+	session.AddFlash(fmt.Sprintf("%s<>%s", t, m))
+	if err := session.Save(r, w); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+// GetFlash ...
+func GetFlash(w http.ResponseWriter, r *http.Request) *Flash {
+	session, _ := store.Get(r, "notification")
+
+	if flashes := session.Flashes(); len(flashes) > 0 {
+		chunks := strings.Split(flashes[0].(string), "<>")
+		f := &Flash{
+			Type:    chunks[0],
+			Message: chunks[1],
+		}
+		if err := session.Save(r, w); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return nil
+		}
+		return f
+	}
+
+	return nil
 }
