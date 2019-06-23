@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/BottleneckStudio/keepmotivat.in/app/session"
+	"BottleneckStudio/keepmotivat.in/app/session"
 )
 
 // TermsOfServiceController is the TermsOfService screen

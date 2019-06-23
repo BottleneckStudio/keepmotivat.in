@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/BottleneckStudio/keepmotivat.in/app/session"
-	tmpl "github.com/BottleneckStudio/keepmotivat.in/template"
+	"BottleneckStudio/keepmotivat.in/app/session"
+	tmpl "BottleneckStudio/keepmotivat.in/template"
 )
 
 // FeedController is the main screen
