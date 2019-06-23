@@ -19,12 +19,11 @@ env:
 before_install:
   - export PATH=$GOPATH/bin:./_output/tools/etcd/bin:$PATH
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 install:
   - export PATH=$GOPATH/bin:./_output/tools/etcd/bin:$PATH
-  - export GO111MODULE=off
-  - dep ensure
+  - export GO111MODULE=on
+  - go mod tidy
   - golangci-lint run
 
 before_script:
