@@ -32,14 +32,10 @@ func (repo DBPostRepository) Create(post *Post) error {
 func (repo DBPostRepository) Get(query *Query) (*Post, error) {
 	post := Post{}
 
-	queryString := "SELECT * FROM post WHERE"
-
-	if query.ByID != nil {
-		queryString = queryString + " " + fmt.Sprintf("id = %d", query.ByID)
-	}
+	queryString := "SELECT * FROM post"
 
 	if query.ByColumn != nil {
-		queryString = queryString + " " + fmt.Sprintf("%v = %v", query.ByColumn.Column, query.ByColumn.Value)
+		queryString = queryString + fmt.Sprintf(" WHERE %v = %v", query.ByColumn.Column, query.ByColumn.Value)
 	}
 
 	err := DB.Get(&post, queryString)
@@ -54,14 +50,10 @@ func (repo DBPostRepository) Get(query *Query) (*Post, error) {
 func (repo DBPostRepository) GetAll(query *Query) (*[]Post, error) {
 	posts := []Post{}
 
-	queryString := "SELECT * FROM post WHERE"
-
-	if query.ByID != nil {
-		queryString = queryString + " " + fmt.Sprintf("id = %d", query.ByID)
-	}
+	queryString := "SELECT * FROM post"
 
 	if query.ByColumn != nil {
-		queryString = queryString + " " + fmt.Sprintf("%v = %v", query.ByColumn.Column, query.ByColumn.Value)
+		queryString = queryString + fmt.Sprintf(" WHERE %v = %v", query.ByColumn.Column, query.ByColumn.Value)
 	}
 
 	err := DB.Select(&posts, queryString)
