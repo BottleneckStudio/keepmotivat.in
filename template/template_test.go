@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	temp "github.com/BottleneckStudio/keepmotivat.in/template"
+	temp "BottleneckStudio/keepmotivat.in/template"
 )
 
 func TestParseTemplateDir(t *testing.T) {
