@@ -22,7 +22,6 @@ func NewGetPostUsecase(repo models.PostRepository) GetPost {
 
 // GetPost ...
 func (uc GetPostUsecase) GetPost(query *models.Query) (*models.Post, error) {
-	post := &models.Post{}
 	post, err := uc.repo.Get(query)
 	if err != nil {
 		return nil, err
@@ -32,7 +31,6 @@ func (uc GetPostUsecase) GetPost(query *models.Query) (*models.Post, error) {
 
 // GetAllPosts ...
 func (uc GetPostUsecase) GetAllPosts(query *models.Query) (*[]models.Post, error) {
-	posts := &[]models.Post{}
 	posts, err := uc.repo.GetAll(query)
 	if err != nil {
 		return nil, err
