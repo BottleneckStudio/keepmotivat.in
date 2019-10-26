@@ -25,8 +25,6 @@ func FeedController(db *models.DB) http.HandlerFunc {
 		postRepo := models.NewDBPostRepository(db)
 		postUsecase := usecase.NewGetPostUsecase(postRepo)
 		posts, err := postUsecase.GetAllPosts(&models.Query{})
-		log.Println("@@@@@@@@@@@@@@@@@@@@@@@@@@")
-		log.Println(posts)
 		if err != nil {
 			log.Println(err)
 		}
