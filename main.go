@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BottleneckStudio/keepmotivat.in/app/controllers"
-	"github.com/BottleneckStudio/keepmotivat.in/models"
-	"github.com/BottleneckStudio/keepmotivat.in/server"
+	"BottleneckStudio/keepmotivat.in/app/controllers"
+	"BottleneckStudio/keepmotivat.in/models"
+	"BottleneckStudio/keepmotivat.in/server"
 	"github.com/gorilla/sessions"
 
 	"github.com/go-chi/chi"
@@ -56,7 +56,7 @@ func main() {
 	db.Use(dbName)
 	db.Migrate()
 
-	router.Get("/", controllers.FeedController())
+	router.Get("/", controllers.FeedController(db))
 	router.Get("/tos", controllers.TermsOfServiceController())
 	router.Get("/about", controllers.AboutController())
 	router.Get("/privacy", controllers.PrivacyController())

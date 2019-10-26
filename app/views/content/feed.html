@@ -1,3 +1,10 @@
 {{ define "content" }}
-  This is the feed: {{ .message | toLower}}
+  <div class="uk-container-small uk-align-center uk-margin-top-small">
+    {{range .posts}}
+      <div class="uk-margin-medium uk-card uk-card-default uk-card-body uk-align-center">
+        <h3 class="uk-card-title">{{.Caption}}</h3>
+        <p>{{.Body}}</p>
+      </div>
+    {{end}}
+  </div>
 {{ end }}
