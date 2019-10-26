@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/BottleneckStudio/keepmotivat.in/models"
+)
 
 // PostRepository handles the CRUD for post.
 type PostRepository interface {
@@ -11,16 +15,18 @@ type PostRepository interface {
 }
 
 // DBPostRepository ...
-type DBPostRepository struct{}
+type DBPostRepository struct {
+	DB *models.DB
+}
 
 // NewDBPostRepository ...
-func NewDBPostRepository() PostRepository {
-	return DBPostRepository{}
+func NewDBPostRepository(db *models.DB) PostRepository {
+	return DBPostRepository{db}
 }
 
 // Create handles the creation of post.
 func (repo DBPostRepository) Create(post *Post) error {
-	tx := DB.MustBegin()
+	tx := repo.DB.MustBegin()
 	_, err := tx.NamedExec("INSERT INTO post (body, caption, user_id, ctime, utime) VALUES (:body, :caption, :user_id, :ctime, :utime)", post)
 	if err != nil {
 		return err
@@ -38,7 +44,7 @@ func (repo DBPostRepository) Get(query *Query) (*Post, error) {
 		queryString = queryString + fmt.Sprintf(" WHERE %v = %v", query.ByColumn.Column, query.ByColumn.Value)
 	}
 
-	err := DB.Get(&post, queryString)
+	err := repo.DB.Get(&post, queryString)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +62,7 @@ func (repo DBPostRepository) GetAll(query *Query) (*[]Post, error) {
 		queryString = queryString + fmt.Sprintf(" WHERE %v = %v", query.ByColumn.Column, query.ByColumn.Value)
 	}
 
-	err := DB.Select(&posts, queryString)
+	err := repo.DB.Select(&posts, queryString)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +72,7 @@ func (repo DBPostRepository) GetAll(query *Query) (*[]Post, error) {
 
 // Update handles the updating of post.
 func (repo DBPostRepository) Update(post *Post) error {
-	tx := DB.MustBegin()
+	tx := repo.DB.MustBegin()
 	_, err := tx.NamedExec("UPDATE post SET body = :body, caption = :caption, user_id = :user_id, ctime = :ctime, utime = :utime WHERE id = :id", post)
 	if err != nil {
 		return err
