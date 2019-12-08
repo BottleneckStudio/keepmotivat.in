@@ -12,7 +12,7 @@ echo $(date) '[ Git Hooks ] Symlinking commit hook scripts...'
 if [ -h .git/hooks/pre-commit ]; then
   echo $(date) '[ Git Hooks ] Commit hook scripts already symlinked'
 else
-  ln -s $(pwd)/script/pre-commit.sh .git/hooks/pre-commit
+  ln -svf $(pwd)/script/pre-commit.sh .git/hooks/pre-commit
   echo $(date) '[ Git Hooks ] Already symlinked. DONE!'
 fi
 
