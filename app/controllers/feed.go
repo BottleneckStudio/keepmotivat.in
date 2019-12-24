@@ -27,6 +27,7 @@ func FeedController(db *models.DB) http.HandlerFunc {
 		posts, err := postUsecase.GetAllPosts(&models.Query{})
 		if err != nil {
 			log.Println(err)
+			return
 		}
 
 		data["posts"] = posts
