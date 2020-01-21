@@ -20,8 +20,8 @@ type Tx struct {
 }
 
 // NewDatabase returns the pointer to sqlx.DB struct.
-func NewDatabase(dataSourceName string) (*DB, error) {
-	sqlDB, dbErr := sqlx.Connect("mysql", dataSourceName)
+func NewDatabase(dialect, dataSourceName string) (*DB, error) {
+	sqlDB, dbErr := sqlx.Connect(dialect, dataSourceName)
 
 	if dbErr != nil {
 		return nil, dbErr
