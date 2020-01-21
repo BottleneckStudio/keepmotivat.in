@@ -32,7 +32,12 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// parse form
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			session.SetFlash(w, r, "error", err.Error())
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
+
 		username := r.Form.Get("username")
 		password := r.Form.Get("password")
 		confirmPassword := r.Form.Get("confirm_password")
