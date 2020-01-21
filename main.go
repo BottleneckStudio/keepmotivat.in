@@ -26,6 +26,8 @@ const (
 	dsn         = "root:@tcp(127.0.0.1:3306)/?charset=utf8mb4"
 	staticFiles = "app/data/assets"
 	proxyPath   = "/assets"
+	dialect     = "mysql"
+	port        = ":1337"
 	// certKey     = "./certificates/localhost+1.pem"
 	// privKey     = "./certificates/localhost+1-key.pem"
 )
@@ -44,7 +46,7 @@ func main() {
 
 	serveStaticFiles(router, proxyPath, staticFiles)
 
-	db, err := models.NewDatabase(dsn)
+	db, err := models.NewDatabase(dialect, dsn)
 	if err != nil {
 		// panic for now.
 		panic(err.Error())
@@ -62,7 +64,10 @@ func main() {
 	router.Get("/privacy", controllers.PrivacyController())
 	router.Get("/post/{postID}", controllers.PostController())
 
-	s := server.New(":1333", router)
+	router.Get("/register", controllers.RegisterViewHandler())
+	router.Post("/register", controllers.RegisterPostController(db))
+
+	s := server.New(port, router)
 	go func() {
 		s.Start()
 	}()
