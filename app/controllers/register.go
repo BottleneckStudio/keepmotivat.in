@@ -3,10 +3,13 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"BottleneckStudio/keepmotivat.in/app/session"
 	"BottleneckStudio/keepmotivat.in/models"
 	tmpl "BottleneckStudio/keepmotivat.in/template"
+	"BottleneckStudio/keepmotivat.in/usecase"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // RegisterViewHandler shows the form.
@@ -38,7 +41,7 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 			return
 		}
 
-		username := r.Form.Get("username")
+		emailAddress := r.Form.Get("email_address")
 		password := r.Form.Get("password")
 		confirmPassword := r.Form.Get("confirm_password")
 
@@ -48,11 +51,41 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 			return
 		}
 
+		// check if we have the existing email address already
+		log.Println(emailAddress)
+
 		// hash the password
-		log.Println(username)
-		log.Println(password)
-		log.Println(confirmPassword)
+		hashedPassword := hashPassword(password)
+
+		userRepo := models.NewDBUserRepository(db)
+		userUsecase := usecase.NewCreateUserUsecase(userRepo)
+
+		user := models.User{
+			EmailAddress: emailAddress,
+			Password:     hashedPassword,
+			Ctime:        time.Now().Unix(),
+		}
+
+		if err := userUsecase.CreateUser(user); err != nil {
+			log.Println("Create User Error: " + err.Error())
+			session.SetFlash(w, r, "error", "Something went wrong registering your account.")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func hashPassword(rawPassword string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.MinCost)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return string(hash)
+}
+
+func comparePasswords() bool {
+	return false
 }
