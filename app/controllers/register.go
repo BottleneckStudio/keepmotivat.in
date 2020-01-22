@@ -85,7 +85,3 @@ func hashPassword(rawPassword string) string {
 
 	return string(hash)
 }
-
-func comparePasswords() bool {
-	return false
-}
