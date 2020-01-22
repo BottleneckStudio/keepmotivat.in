@@ -23,7 +23,6 @@ func NewDBUserRepository(db *DB) UserRepository {
 // Create handles the creation of post.
 func (repo DBUserRepository) Create(user User) error {
 	tx := repo.DB.MustBegin()
-	_ = repo.DB.MustExec("USE keepmotivatin;")
 	_, err := tx.NamedExec("INSERT INTO users (email, password, ctime) VALUES (:email_address, :password, :ctime)", user)
 	if err != nil {
 		return err
