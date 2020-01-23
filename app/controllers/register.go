@@ -33,7 +33,6 @@ func RegisterViewHandler() http.HandlerFunc {
 // RegisterPostController ...
 func RegisterPostController(db *models.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		// parse form
 		if err := r.ParseForm(); err != nil {
 			session.SetFlash(w, r, "error", err.Error())
@@ -51,22 +50,33 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 			return
 		}
 
-		// check if we have the existing email address already
-		log.Println(emailAddress)
-
 		// hash the password
 		hashedPassword := hashPassword(password)
 
 		userRepo := models.NewDBUserRepository(db)
-		userUsecase := usecase.NewCreateUserUsecase(userRepo)
 
-		user := models.User{
-			EmailAddress: emailAddress,
-			Password:     hashedPassword,
-			Ctime:        time.Now().Unix(),
+		// check if we have the existing email address already
+		getUserUsecase := usecase.NewGetUserUsecase(userRepo)
+		user, err := getUserUsecase.GetUser(models.Query{})
+		if err != nil {
+			log.Println(err.Error())
+			session.SetFlash(w, r, "error", "Something went wrong")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
 		}
 
-		if err := userUsecase.CreateUser(user); err != nil {
+		if user.EmailAddress == emailAddress {
+			session.SetFlash(w, r, "error", "Email Address is already taken.")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
+
+		user.EmailAddress = emailAddress
+		user.Password = hashedPassword
+		user.Ctime = time.Now().Unix()
+
+		createUserUsecase := usecase.NewCreateUserUsecase(userRepo)
+		if err := createUserUsecase.CreateUser(*user); err != nil {
 			log.Println("Create User Error: " + err.Error())
 			session.SetFlash(w, r, "error", "Something went wrong registering your account.")
 			http.Redirect(w, r, "/register", http.StatusSeeOther)
