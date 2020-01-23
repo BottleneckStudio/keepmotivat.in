@@ -20,7 +20,7 @@ func NewDBUserRepository(db *DB) UserRepository {
 	return DBUserRepository{db}
 }
 
-// Create handles the creation of post.
+// Create handles the creation of user.
 func (repo DBUserRepository) Create(user User) error {
 	tx := repo.DB.MustBegin()
 	_, err := tx.NamedExec("INSERT INTO users (email, password, ctime) VALUES (:email_address, :password, :ctime)", user)
@@ -66,7 +66,7 @@ func (repo DBUserRepository) GetAll(query Query) (Users, error) {
 	return users, nil
 }
 
-// Update handles the updating of post.
+// Update handles the updating of user.
 func (repo DBUserRepository) Update(user User) error {
 	// tx := repo.DB.MustBegin()
 	// _, err := tx.NamedExec("UPDATE p SET body = :body, caption = :caption, user_id = :user_id, ctime = :ctime, utime = :utime WHERE id = :id", user)
