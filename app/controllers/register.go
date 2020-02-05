@@ -3,10 +3,13 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"BottleneckStudio/keepmotivat.in/app/session"
 	"BottleneckStudio/keepmotivat.in/models"
 	tmpl "BottleneckStudio/keepmotivat.in/template"
+	"BottleneckStudio/keepmotivat.in/usecase"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // RegisterViewHandler shows the form.
@@ -30,7 +33,6 @@ func RegisterViewHandler() http.HandlerFunc {
 // RegisterPostController ...
 func RegisterPostController(db *models.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		// parse form
 		if err := r.ParseForm(); err != nil {
 			session.SetFlash(w, r, "error", err.Error())
@@ -38,7 +40,7 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 			return
 		}
 
-		username := r.Form.Get("username")
+		emailAddress := r.Form.Get("email_address")
 		password := r.Form.Get("password")
 		confirmPassword := r.Form.Get("confirm_password")
 
@@ -49,10 +51,47 @@ func RegisterPostController(db *models.DB) http.HandlerFunc {
 		}
 
 		// hash the password
-		log.Println(username)
-		log.Println(password)
-		log.Println(confirmPassword)
+		hashedPassword := hashPassword(password)
+
+		userRepo := models.NewDBUserRepository(db)
+
+		// check if we have the existing email address already
+		getUserUsecase := usecase.NewGetUserUsecase(userRepo)
+		user, err := getUserUsecase.GetUser(models.Query{})
+		if err != nil {
+			log.Println(err.Error())
+			session.SetFlash(w, r, "error", "Something went wrong")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
+
+		if user.EmailAddress == emailAddress {
+			session.SetFlash(w, r, "error", "Email Address is already taken.")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
+
+		user.EmailAddress = emailAddress
+		user.Password = hashedPassword
+		user.Ctime = time.Now().Unix()
+
+		createUserUsecase := usecase.NewCreateUserUsecase(userRepo)
+		if err := createUserUsecase.CreateUser(*user); err != nil {
+			log.Println("Create User Error: " + err.Error())
+			session.SetFlash(w, r, "error", "Something went wrong registering your account.")
+			http.Redirect(w, r, "/register", http.StatusSeeOther)
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func hashPassword(rawPassword string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.MinCost)
+	if err != nil {
+		log.Println(err)
+	}
+
+	return string(hash)
 }

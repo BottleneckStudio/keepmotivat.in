@@ -8,3 +8,6 @@ type User struct {
 	Ctime        int64  `db:"ctime"`
 	Utime        int64  `db:"utime"`
 }
+
+// Users repsents a slice of user.
+type Users []User
